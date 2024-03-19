@@ -1,0 +1,150 @@
+﻿Program.Sub.ScreenSU.Start
+Gui.F_Setup..Create
+Gui.F_Setup..Caption("Indirect Job Setup For GAB Man Utilization")
+Gui.F_Setup..Size(7140,8700)
+Gui.F_Setup..MinX(0)
+Gui.F_Setup..MinY(0)
+Gui.F_Setup..Position(0,0)
+Gui.F_Setup..FontSize(9)
+Gui.F_Setup..BackColor(-2147483633)
+Gui.F_Setup..MousePointer(0)
+Gui.F_Setup..Event(UnLoad,Unload)
+Gui.F_Setup.GsGCIndirect.Create(GsGridControl)
+Gui.F_Setup.GsGCIndirect.Size(6795,7425)
+Gui.F_Setup.GsGCIndirect.Position(60,660)
+Gui.F_Setup.GsGCIndirect.Event(CellValueChanged,GsGCIndirect_CellValueChanged)
+Gui.F_Setup.txtBreak.Create(TextBox,"",True,1365,300,0,90,240,True,0,"Arial",8,-2147483643,1)
+Gui.F_Setup.txtBreak.NumericOnly(1)
+Gui.F_Setup.lbl1.Create(Label,"Launch/Break Hours",True,1935,255,0,60,15,True,0,"Arial",8,-2147483633,0)
+Gui.F_Setup.cmdSave.Create(Button)
+Gui.F_Setup.cmdSave.Size(1440,375)
+Gui.F_Setup.cmdSave.Position(5400,120)
+Gui.F_Setup.cmdSave.Caption("Save")
+Gui.F_Setup.cmdSave.Event(Click,cmdSave_Click)
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+V.Local.sIcon.Declare
+V.Local.bExist.Declare
+
+F.ODBC.Connection!con.OpenConnection(V.Ambient.PDSN,V.Ambient.PUser,V.Ambient.PPass)
+
+F.Intrinsic.String.Build("{0}\ART\gss2.ico",V.Caller.GlobalDir,V.Local.sIcon)
+Gui.F_Setup..Icon(V.Local.sIcon)
+
+Gui.F_Setup.GsGCIndirect.Anchor(15)
+
+F.ODBC.Connection!Con.TableExists("GAB_MAN_UTILY_BREAK",V.Local.bExist)
+F.Intrinsic.Control.If(V.Local.bExist,=,False)
+	F.ODBC.Connection!Con.Execute("CREATE TABLE GAB_MAN_UTILY_BREAK ( COMPANY CHAR(3) NOT NULL, BREAK DOUBLE );")
+F.Intrinsic.Control.EndIf
+
+F.ODBC.Connection!Con.TableExists("GAB_MAN_UTILY_IND",V.Local.bExist)
+F.Intrinsic.Control.If(V.Local.bExist,=,False)
+	F.ODBC.Connection!Con.Execute("CREATE TABLE GAB_MAN_UTILY_IND ( JOB CHAR(6) NOT NULL, SUFFIX CHAR(3) NOT NULL, SEQUENCE CHAR(6) NOT NULL, FLAG BIT NOT NULL );")
+F.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.CallSub(LoadGrid)
+
+Gui.F_Setup..Show
+Program.Sub.Main.End
+
+Program.Sub.Unload.Start
+F.Intrinsic.Control.If(V.DataTable.dtIndirect.Exists,=,True)
+	F.Data.DataTable.Close("dtIndirect")
+F.Intrinsic.Control.EndIf
+F.ODBC.Connection!con.Close
+F.Intrinsic.Control.End
+
+Program.Sub.Unload.End
+
+Program.Sub.LoadGrid.Start
+V.Local.sSQL.Declare
+
+F.Intrinsic.String.Build("select * from GAB_MAN_utily_BREAK where company = '{0}'",V.Caller.CompanyCode,V.Local.sSQL)
+F.ODBC.Connection!con.OpenLocalRecordsetRO("rst",V.Local.sSQL)
+F.Intrinsic.Control.If(V.ODBC.con!rst.EOF,=,True)
+	Gui.F_Setup.txtBreak.Text(0.00)
+F.Intrinsic.Control.Else
+	Gui.F_Setup.txtBreak.Text(V.ODBC.con!rst.FieldVal!Break)
+F.Intrinsic.Control.EndIf
+F.ODBC.con!rst.Close
+
+F.Data.DataTable.CreateFromSQL("dtIndirect","con","select A.Job, A.Suffix, A.Sequence, if(B.flag<>'',(if(B.flag=0,cast(0 as bit),cast(1 as bit))),cast(0 as bit)) as Flag from ind_lbr_accts A left join gab_man_utily_ind B on A.Job = B.Job and A.Suffix = B.Suffix and A.Sequence = B.Sequence",True)
+
+Gui.F_Setup.GsGCIndirect.AddGridviewFromDatatable("gvIndirect","dtIndirect")
+Gui.F_Setup.GsGCIndirect.MainView("gvIndirect")
+Gui.F_Setup.GsGCIndirect.SetColumnProperty("gvIndirect","Job","HeaderHAlignment","Center")
+Gui.F_Setup.GsGCIndirect.SetColumnProperty("gvIndirect","Suffix","HeaderHAlignment","Center")
+Gui.F_Setup.GsGCIndirect.SetColumnProperty("gvIndirect","Sequence","HeaderHAlignment","Center")
+Gui.F_Setup.GsGCIndirect.SetColumnProperty("gvIndirect","Flag","HeaderHAlignment","Center")
+Gui.F_Setup.GsGCIndirect.SetColumnProperty("gvIndirect","Flag","Caption","Indirect")
+Gui.F_Setup.GsGCIndirect.SetColumnProperty("gvIndirect","Job","MinWidth","70")
+Gui.F_Setup.GsGCIndirect.SetColumnProperty("gvIndirect","Suffix","MinWidth","40")
+Gui.F_Setup.GsGCIndirect.SetColumnProperty("gvIndirect","Sequence","MinWidth","70")
+Gui.F_Setup.GsGCIndirect.SetColumnProperty("gvIndirect","Flag","MinWidth","100")
+Gui.F_Setup.GsGCIndirect.SetColumnProperty("gvIndirect","Flag","AllowEdit",True)
+Gui.F_Setup.GsGCIndirect.SetColumnProperty("gvIndirect","Flag","ReadOnly",False)
+Program.Sub.LoadGrid.End
+
+Program.Sub.GsGCIndirect_CellValueChanged.Start
+V.Local.bValue.Declare
+V.Local.sSQL.Declare
+
+V.Local.bValue.Set(V.Args.Value)
+F.Intrinsic.Control.If(V.Args.Column,=,"Flag")
+	F.Intrinsic.Control.If(V.Local.bValue,=,True)
+		F.Data.DataTable.SetValue("dtIndirect",V.Args.RowIndex,"Flag",True)
+		F.Intrinsic.String.Build("select * from GAB_MAN_utily_IND where job = '{0}' and suffix = '{1}' and sequence = '{2}'",V.DataTable.dtIndirect(V.Args.RowIndex).Job!FieldValTrim,V.DataTable.dtIndirect(V.Args.RowIndex).Suffix!FieldValTrim,V.DataTable.dtIndirect(V.Args.RowIndex).Sequence!FieldValTrim,V.Local.sSQL)
+		F.ODBC.Connection!con.OpenLocalRecordsetRO("rst",V.Local.sSQL)
+		F.Intrinsic.Control.If(V.ODBC.con!rst.EOF,=,True)
+			F.Intrinsic.String.Build("insert into GAB_MAN_utily_IND(job,suffix,sequence,flag) values('{0}','{1}','{2}',1);",V.DataTable.dtIndirect(V.Args.RowIndex).Job!FieldValTrim,V.DataTable.dtIndirect(V.Args.RowIndex).Suffix!FieldValTrim,V.DataTable.dtIndirect(V.Args.RowIndex).Sequence!FieldValTrim,V.Local.sSQL)
+		F.Intrinsic.Control.Else
+			F.Intrinsic.String.Build("update GAB_MAN_utily_IND set flag = 1 where job = '{0}' and suffix = '{1}' and sequence = '{2}'",V.DataTable.dtIndirect(V.Args.RowIndex).Job!FieldValTrim,V.DataTable.dtIndirect(V.Args.RowIndex).Suffix!FieldValTrim,V.DataTable.dtIndirect(V.Args.RowIndex).Sequence!FieldValTrim,V.Local.sSQL)
+		F.Intrinsic.Control.EndIf
+		F.ODBC.con!rst.Close
+		F.ODBC.Connection!con.Execute(V.Local.sSQL)
+	F.Intrinsic.Control.Else
+		F.Data.DataTable.SetValue("dtIndirect",V.Args.RowIndex,"Flag",False)
+		F.Intrinsic.String.Build("select * from GAB_MAN_utily_IND where job = '{0}' and suffix = '{1}' and sequence = '{2}'",V.DataTable.dtIndirect(V.Args.RowIndex).Job!FieldValTrim,V.DataTable.dtIndirect(V.Args.RowIndex).Suffix!FieldValTrim,V.DataTable.dtIndirect(V.Args.RowIndex).Sequence!FieldValTrim,V.Local.sSQL)
+		F.ODBC.Connection!con.OpenLocalRecordsetRO("rst",V.Local.sSQL)
+		F.Intrinsic.Control.If(V.ODBC.con!rst.EOF,=,True)
+			F.Intrinsic.String.Build("insert into GAB_MAN_utily_IND(job,suffix,sequence,flag) values('{0}','{1}','{2}',0);",V.DataTable.dtIndirect(V.Args.RowIndex).Job!FieldValTrim,V.DataTable.dtIndirect(V.Args.RowIndex).Suffix!FieldValTrim,V.DataTable.dtIndirect(V.Args.RowIndex).Sequence!FieldValTrim,V.Local.sSQL)
+		F.Intrinsic.Control.Else
+			F.Intrinsic.String.Build("update GAB_MAN_utily_IND set flag = 0 where job = '{0}' and suffix = '{1}' and sequence = '{2}'",V.DataTable.dtIndirect(V.Args.RowIndex).Job!FieldValTrim,V.DataTable.dtIndirect(V.Args.RowIndex).Suffix!FieldValTrim,V.DataTable.dtIndirect(V.Args.RowIndex).Sequence!FieldValTrim,V.Local.sSQL)
+		F.Intrinsic.Control.EndIf
+		F.ODBC.con!rst.Close
+		F.ODBC.Connection!con.Execute(V.Local.sSQL)
+	F.Intrinsic.Control.EndIf
+F.Intrinsic.Control.EndIf
+Program.Sub.GsGCIndirect_CellValueChanged.End
+
+Program.Sub.cmdSave_Click.Start
+V.Local.i1.Declare
+V.Local.i2.Declare
+V.Local.sSQL.Declare
+V.Local.fBreak.Declare
+V.Local.sQuery.Declare
+
+V.Local.fBreak.Set(V.Screen.F_Setup!txtBreak.Text)
+
+F.Intrinsic.String.Build("select * from GAB_MAN_utily_BREAK where company = '{0}'",V.Caller.CompanyCode,V.Local.sSQL)
+F.ODBC.Connection!con.OpenLocalRecordsetRO("rst",V.Local.sSQL)
+F.Intrinsic.Control.If(V.ODBC.con!rst.EOF,=,True)
+	F.Intrinsic.String.Build("insert into GAB_MAN_utily_BREAK(company,break) values('{0}',{1});",V.Caller.CompanyCode,V.Local.fBreak,V.Local.sQuery)
+	F.ODBC.Connection!con.Execute(V.Local.sQuery)
+F.Intrinsic.Control.Else
+	F.Intrinsic.String.Build("update GAB_MAN_utily_BREAK set break = {1} where company = '{0}'",V.Caller.CompanyCode,V.Local.fBreak,V.Local.sQuery)
+	F.ODBC.Connection!con.Execute(V.Local.sQuery)
+F.Intrinsic.Control.EndIf
+F.ODBC.con!rst.Close
+Program.Sub.cmdSave_Click.End
+
+Program.Sub.Comments.Start
+${$0$}$MAN UTILIZATION$}$DYUNUS$}$8/14/2019 3:52:20 PM$}$False
+${$5$}$2.0.0.0$}$2
+${$6$}$dyunus$}$20240104145850069$}$xZ6SHi8g7O0Qsxe6AiO2NH3PnOKQRy0Tfvbf9mRZQsHnlrn+n1dFF/0YXWtOYHRqDnTgWTT9Xx8=
+Program.Sub.Comments.End
