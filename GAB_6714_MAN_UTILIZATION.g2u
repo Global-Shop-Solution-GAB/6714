@@ -1,0 +1,397 @@
+﻿Program.Sub.ScreenSU.Start
+Gui.frmManUtility..Create
+Gui.frmManUtility..Caption("Man Utilization")
+Gui.frmManUtility..Size(15045,10095)
+Gui.frmManUtility..MinX(15045)
+Gui.frmManUtility..MinY(10095)
+Gui.frmManUtility..Position(0,0)
+Gui.frmManUtility..BackColor(-2147483633)
+Gui.frmManUtility..MousePointer(0)
+Gui.frmManUtility..Event(UnLoad,Unload)
+Gui.frmManUtility.picGSSLogo.Create(PictureBox)
+Gui.frmManUtility.picGSSLogo.Size(9250,1540)
+Gui.frmManUtility.picGSSLogo.Position(5310,45)
+Gui.frmManUtility.lblStatus.Create(Label,"Loading Data....",False,1935,255,0,2385,30,True,0,"Arial",8,-2147483633,0)
+Gui.frmManUtility.pbStatus.Create(ProgressBar)
+Gui.frmManUtility.pbStatus.Size(1935,255)
+Gui.frmManUtility.pbStatus.Position(2415,300)
+Gui.frmManUtility.pbStatus.Visible(False)
+Gui.frmManUtility.GsGCManUtility.Create(GsGridControl)
+Gui.frmManUtility.GsGCManUtility.Size(14965,8505)
+Gui.frmManUtility.GsGCManUtility.Position(30,1215)
+Gui.frmManUtility.GsGCManUtility.TabStop(True)
+Gui.frmManUtility.GsGCManUtility.TabIndex(4)
+Gui.frmManUtility.cmdRefresh.Create(Button)
+Gui.frmManUtility.cmdRefresh.Size(975,345)
+Gui.frmManUtility.cmdRefresh.Position(2400,795)
+Gui.frmManUtility.cmdRefresh.Caption("REFRESH")
+Gui.frmManUtility.cmdRefresh.Event(Click,LoadDtManUtility)
+Gui.frmManUtility.cmdRefresh.TabStop(True)
+Gui.frmManUtility.cmdRefresh.TabIndex(3)
+Gui.frmManUtility.dtpBeg.Create(DatePicker)
+Gui.frmManUtility.dtpBeg.Size(1935,285)
+Gui.frmManUtility.dtpBeg.Position(150,225)
+Gui.frmManUtility.dtpEnd.Create(DatePicker)
+Gui.frmManUtility.dtpEnd.Size(1935,285)
+Gui.frmManUtility.dtpEnd.Position(150,825)
+Gui.frmManUtility.lblBegDate.Create(Label,"Beg.Date",True,1935,255,0,120,30,True,0,"Arial",8,-2147483633,0)
+Gui.frmManUtility.lblEndDate.Create(Label,"End Date",True,1935,255,0,120,600,True,0,"Arial",8,-2147483633,0)
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+	V.Global.bLoadDate.Declare
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+
+	V.Local.sGSSLogo.Declare
+	V.Local.sIcon.Declare
+	V.Local.sDir.Declare
+	V.Local.bDir.Declare
+
+	F.Intrinsic.String.Build("{0}\GAB\GAS\gss2.ico",V.Caller.PluginsDir,v.Local.sIcon)
+	F.Intrinsic.String.Build("{0}\GAB\GAS\GAB_GSS_Logo_Green_Dash.png",V.Caller.PluginsDir,V.Local.sGssLogo)
+	Gui.frmManUtility.picGSSLogo.Picture(V.Local.sGSSLogo)
+	Gui.frmManUtility..Icon(V.Local.sIcon)
+'	Gui.frmTotalsPL..Icon(V.Local.sIcon)
+
+	F.Intrinsic.Control.CallSub(SetAnchors)
+	F.Intrinsic.Control.CallSub(SetContextMenus)
+
+	Gui.frmManUtility..Show
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End
+
+	F.Intrinsic.Control.EndTry
+Program.Sub.Main.End
+
+Program.Sub.Unload.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+
+	F.Intrinsic.Control.If(V.Global.bLoadDate)
+		F.Intrinsic.Control.CallSub(Serialize)
+	F.Intrinsic.Control.EndIf
+	F.Intrinsic.Control.End
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End
+
+	F.Intrinsic.Control.EndTry
+Program.Sub.Unload.End
+
+Program.Sub.SetAnchors.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+
+	'0 - None
+	'1 - Top
+	'2 - Bottom
+	'4 - Left
+	'8 - Right
+
+	Gui.frmManUtility.picGssLogo.Anchor(1)
+	Gui.frmManUtility.GsGCManUtility.Anchor(15)
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End
+
+	F.Intrinsic.Control.EndTry
+Program.Sub.SetAnchors.End
+
+Program.Sub.SetContextMenus.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+
+	Gui.frmManUtility..ContextMenuCreate("ctxManUtility")
+	Gui.frmManUtility.GsGCManUtility.ContextMenuAttach("ctxManUtility")
+	Gui.frmManUtility..ContextMenuAddItem("ctxManUtility","Refresh",0,"Refresh")
+	Gui.frmManUtility..ContextMenuAddItem("ctxManUtility","Export",0,"Export")
+	Gui.frmManUtility..ContextMenuAddItem("ctxManUtility","ResetColumns",0,"Reset Columns")
+	Gui.frmManUtility..ContextMenuSetItemEventHandler("ctxManUtility","Refresh","LoadDtManUtility")
+	Gui.frmManUtility..ContextMenuSetItemEventHandler("ctxManUtility","Export","MenuClickExport")
+	Gui.frmManUtility..ContextMenuSetItemEventHandler("ctxManUtility","ResetColumns","MenuClickResetColumns")
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End
+
+	F.Intrinsic.Control.EndTry
+Program.Sub.SetContextMenus.End
+
+Program.Sub.MenuClickExport.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+
+	V.Local.sFileExport.Declare
+	V.Local.bExcel.Declare
+	V.Local.bFileLocked.Declare
+	V.Local.sMsg.Declare
+	V.Local.sControl.Declare
+
+		F.Automation.MSExcel.CheckPresence(V.Local.bExcel)
+		F.Intrinsic.Control.If(V.Local.bExcel)
+			F.Intrinsic.String.Build("{0}\GAB_Man_Utilization_{1}_Export.xlsx",V.Caller.LocalGssTempDir,V.Local.sControl,V.Local.sFileExport)
+			F.Intrinsic.File.IsFileLocked(V.Local.sFileExport,V.Local.bFileLocked)
+			F.Intrinsic.Control.If(V.Local.bFileLocked)
+				F.Intrinsic.String.Build("File is already open. Please close and export again.{0}File: {1}",V.Ambient.NewLine,V.Local.sFileExport,V.Local.sMsg)
+				F.Intrinsic.UI.Msgbox(V.Local.sMsg,"File In Use")
+			F.Intrinsic.Control.Else
+				Gui.frmManUtility.GsGCManUtility.Export(V.Local.sFileExport,"xlsx")
+				F.Intrinsic.Task.ShellExec(0,"",V.Local.sFileExport,"","",1)
+			F.Intrinsic.Control.EndIf
+		F.Intrinsic.Control.Else
+			F.Intrinsic.String.Build("{0}\GAB_Man_Utilization_{1}_Export.csv",V.Caller.LocalGssTempDir,V.Local.sControl,V.Local.sFileExport)
+			F.Intrinsic.File.IsFileLocked(V.Local.sFileExport,V.Local.bFileLocked)
+			F.Intrinsic.Control.If(V.Local.bFileLocked)
+				F.Intrinsic.String.Build("File is already open. Please close and export again.{0}File: {1}",V.Ambient.NewLine,V.Local.sFileExport,V.Local.sMsg)
+				F.Intrinsic.UI.Msgbox(V.Local.sMsg,"File In Use")
+			F.Intrinsic.Control.Else
+				Gui.frmManUtility.GsGCManUtility.Export(V.Local.sFileExport,"csv")
+			F.Intrinsic.Control.EndIf
+			F.Intrinsic.Task.ShellExec(0,"",V.Local.sFileExport,"","",1)
+		F.Intrinsic.Control.EndIf
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.MenuClickExport.End
+
+Program.Sub.MenuClickResetColumns.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+
+	V.Local.bSerialize.Declare
+
+	F.Intrinsic.Control.SelectCase(V.Args.MenuName)
+		F.Intrinsic.Control.Case("ctxManUtility")
+			V.Global.bLoadDate.Set(False)
+			F.Global.Registry.AddValue(V.Caller.User,V.Caller.CompanyCode,"gvManUtility",4631,1000,False,"Serialize",False,0,-999.0,1/1/1980,12:00:00 AM,"")
+			F.Intrinsic.Control.CallSub(LoadDtManUtility)
+	F.Intrinsic.Control.EndSelect
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End
+
+	F.Intrinsic.Control.EndTry
+Program.Sub.MenuClickResetColumns.End
+
+Program.Sub.LoadDtManUtility.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+
+	V.Local.sSQL.Declare
+	V.Local.dBegDate.Declare
+	V.Local.dEndDate.Declare
+	V.Local.sPart.Declare
+	V.Local.sActiveFilterString.Declare
+	V.Local.fBreak.Declare
+
+	Gui.frmManUtility.lblStatus.Visible(True)
+	Gui.frmManUtility.pbStatus.Visible(True)
+	Gui.frmManUtility.pbStatus.Min(0)
+	Gui.frmManUtility.pbStatus.Max(100)
+
+	F.ODBC.Connection!con.OpenCompanyConnection(300)
+
+	F.Intrinsic.Control.If(V.Global.bLoadDate)
+		F.Intrinsic.Control.CallSub(Serialize)
+	F.Intrinsic.Control.EndIf
+	V.Global.bLoadDate.Set(True)
+
+	F.Intrinsic.Control.If(V.DataTable.dtManUtility.Exists)
+		F.Data.DataTable.Close("dtManUtility")
+	F.Intrinsic.Control.EndIf
+
+	V.Local.dBegDate.Set(V.Screen.frmManUtility!dtpBeg.Value)
+	V.Local.dEndDate.Set(V.Screen.frmManUtility!dtpEnd.Value)
+
+	'FInd Break Hours
+	F.Intrinsic.String.Build("select * from GAB_MAN_utily_BREAK where company = '{0}'",V.Caller.CompanyCode,V.Local.sSQL)
+	F.ODBC.Connection!con.OpenLocalRecordsetRO("rst",V.Local.sSQL)
+	F.Intrinsic.Control.If(V.ODBC.con!rst.EOF,=,True)
+		V.Local.fBreak.Set(0.00)
+	F.Intrinsic.Control.Else
+		V.Local.fBreak.Set(V.ODBC.con!rst.FieldVal!Break)
+	F.Intrinsic.Control.EndIf
+	F.ODBC.con!rst.Close			
+
+	'Find Employee Data
+
+	F.Intrinsic.String.Build("Select AT.Employee, AT.Name, AT.TimeTotal, If(AH.Actual<>'',AH.Actual,0) as Actual, If(Prod.ProdInd<>'',Prod.ProdInd,0) as ProdInd, If(IND.Indirect<>'',IND.Indirect,0) as Indirect, If(cast(((if(RTRIM(AH.Actual)<>'',AH.Actual,0)+(If(Prod.ProdInd<>'',Prod.ProdInd,0))))/Nullif((AT.TimeTotal),0) as numeric(10,5))<>'',cast(((if(RTRIM(AH.Actual)<>'',AH.Actual,0))+(If(Prod.ProdInd<>'',Prod.ProdInd,0)))/Nullif((AT.TimeTotal),0) as numeric(10,5)),0)*100 As Man_Utilization from (Select Employee, Name, Sum((Hours_HH+(Hours_MM/60)-{2})) as TimeTotal From V_Time_Attendance Where Charge_Date Between '{0}' and '{1}' Group By Employee, Name) AT Left Join (Select EMPL, sum(hours_worked) as Actual From V_Job_Detail A Where Flag_Indirect <> 'I' and Date_Sequence between '{0}' and '{1}' Group by Empl) AH On AT.Employee = AH.Empl Left Join (Select EMPL, sum(hours_worked) as Indirect From V_Job_Detail A Inner Join (Select A.Job, A.Suffix, A.Sequence, if(B.flag<>'',(if(B.flag=0,cast(0 as bit),cast(1 as bit))),cast(0 as bit)) as Flag From Ind_Lbr_Accts A Left Join Gab_Man_utily_Ind B On A.Job = B.Job and A.Suffix = B.Suffix and A.Sequence = B.Sequence Where (if(B.flag<>'',(if(B.flag=0,cast(0 as bit),cast(1 as bit))),cast(0 as bit))) = 1) B On A.Job = B.Job and A.Suffix = B.Suffix and A.Seq = B.Sequence Where Flag_Indirect = 'I' and Date_Sequence between '{0}' and '{1}' Group by Empl) Ind On AT.Employee = IND.Empl Left Join (Select EMPL, sum(hours_worked) as ProdInd From V_Job_Detail A Inner Join (Select A.Job, A.Suffix, A.Sequence, if(B.flag<>'',(if(B.flag=0,cast(0 as bit),cast(1 as bit))),cast(0 as bit)) as Flag From Ind_Lbr_Accts A Left Join Gab_Man_utily_Ind B On A.Job = B.Job and A.Suffix = B.Suffix and A.Sequence = B.Sequence Where (if(B.flag<>'',(if(B.flag=0,cast(0 as bit),cast(1 as bit))),cast(0 as bit))) = 0) B On A.Job = B.Job and A.Suffix = B.Suffix and A.Seq = B.Sequence Where Flag_Indirect = 'I' and Date_Sequence between '{0}' and '{1}' Group by Empl) Prod On AT.Employee = Prod.Empl;",V.Local.dBegDate.PervasiveDate,V.Local.dEndDate.PervasiveDate,V.Local.fBreak,V.Local.sSQL)
+	F.Data.DataTable.CreateFromSQL("dtManUtility","con",V.Local.sSQL,True)
+	Gui.frmManUtility.pbStatus.Value(15)
+
+	F.ODBC.Connection!con.Close
+
+	Gui.frmManUtility.pbStatus.Value(90)
+	F.Intrinsic.Control.CallSub(LoadGvManUtility)
+	F.Intrinsic.Control.CallSub(Deserialize)
+	Gui.frmManUtility.pbStatus.Value(100)
+	Gui.frmManUtility.lblStatus.Visible(False)
+	Gui.frmManUtility.pbStatus.Visible(False)
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End
+
+	F.Intrinsic.Control.EndTry
+Program.Sub.LoadDtManUtility.End
+
+Program.Sub.LoadGvManUtility.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+
+	Gui.frmManUtility.GsGCManUtility.AddGridviewFromDatatable("gvManUtility","dtManUtility")
+	Gui.frmManUtility.GsGCManUtility.SuspendLayout()
+	Gui.frmManUtility.GsGCManUtility.SetGridViewProperty("gvManUtility","MultiSelect",True)
+	Gui.frmManUtility.GsGCManUtility.SetGridViewProperty("gvManUtility","AllowSort",True)
+	Gui.frmManUtility.GsGCManUtility.SetGridViewProperty("gvManUtility","AllowFilter",True)
+	Gui.frmManUtility.GsGCManUtility.SetGridViewProperty("gvManUtility","ShowGroupPanel",True)
+	Gui.frmManUtility.GsGCManUtility.SetGridViewProperty("gvManUtility","EnableAppearanceOddRow",True)
+	Gui.frmManUtility.GsGCManUtility.SetGridViewProperty("gvManUtility","OptionsViewColumnAutoWidth",False)
+
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Employee","VisibleIndex","0")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Name","VisibleIndex","1")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","TimeTotal","VisibleIndex","2")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Actual","VisibleIndex","3")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","ProdInd","VisibleIndex","4")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Indirect","VisibleIndex","5")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Man_Utilization","VisibleIndex","6")
+
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Employee","Caption","Employee")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Name","Caption","Name")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","TimeTotal","Caption","Time Attendance")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Actual","Caption","Actual")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","ProdInd","Caption","Productive Indirect")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Indirect","Caption","Indirect")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Man_Utilization","Caption","Man Utilization %")
+
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Employee","AllowEdit",False)
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Name","AllowEdit",False)
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","TimeTotal","AllowEdit",False)
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Actual","AllowEdit",False)
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","ProdInd","AllowEdit",False)
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Indirect","AllowEdit",False)
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Man_Utilization","AllowEdit",False)
+
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Employee","ReadOnly",True)
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Name","ReadOnly",True)
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","TimeTotal","ReadOnly",True)
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Actual","ReadOnly",True)
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","ProdInd","ReadOnly",True)
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Indirect","ReadOnly",True)
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Man_Utilization","ReadOnly",True)
+
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Employee","MinWidth","50")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Name","MinWidth","200")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","TimeTotal","MinWidth","200")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Actual","MinWidth","200")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","ProdInd","MinWidth","200")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Indirect","MinWidth","200")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Man_Utilization","MinWidth","265")
+
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Employee","HeaderFontBold",True)
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Name","HeaderFontBold",True)
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","TimeTotal","HeaderFontBold",True)
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Actual","HeaderFontBold",True)
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","ProdInd","HeaderFontBold",True)
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Indirect","HeaderFontBold",True)
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Man_Utilization","HeaderFontBold",True)
+
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Employee","HeaderHAlignment","Center")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Name","HeaderHAlignment","Center")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","TimeTotal","HeaderHAlignment","Center")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Actual","HeaderHAlignment","Center")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","ProdInd","HeaderHAlignment","Center")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Indirect","HeaderHAlignment","Center")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Man_Utilization","HeaderHAlignment","Center")
+
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Employee","CellHAlignment","Center")
+
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","TimeTotal","DisplayCustomNumeric","#,###,##0.00####")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Actual","DisplayCustomNumeric","#,###,##0.00####")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","ProdInd","DisplayCustomNumeric","#,###,##0.00####")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Indirect","DisplayCustomNumeric","#,###,##0.00####")
+	Gui.frmManUtility.GsGCManUtility.SetColumnProperty("gvManUtility","Man_Utilization","DisplayCustomNumeric","#,###,##0.00####")
+
+	Gui.frmManUtility.GsGCManUtility.AddSummaryItem("gvManUtility","TimeTotal","","Average","","","n")
+	Gui.frmManUtility.GsGCManUtility.AddSummaryItem("gvManUtility","Actual","","Average","","","n")
+	Gui.frmManUtility.GsGCManUtility.AddSummaryItem("gvManUtility","ProdInd","","Average","","","n")
+	Gui.frmManUtility.GsGCManUtility.AddSummaryItem("gvManUtility","Indirect","","Average","","","n")
+	Gui.frmManUtility.GsGCManUtility.AddSummaryItem("gvManUtility","Man_Utilization","","Average","","","n")
+
+'	F.Intrinsic.Control.If(V.Caller.GSSVersion,>,2016.2)
+'		Gui.frmManUtility.GsGCManUtility.AddGridGroupSummaryItem("gvManUtility","Ext_Cost","Ext_Cost2","Sum","| Tot Cost: "," |","n")
+'	F.Intrinsic.Control.EndIf
+
+	Gui.frmManUtility.GsGCManUtility.ResumeLayout()
+	Gui.frmManUtility.GsGCManUtility.MainView("gvManUtility")
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End
+
+	F.Intrinsic.Control.EndTry
+Program.Sub.LoadGvManUtility.End
+
+Program.Sub.Serialize.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+
+	V.Local.sSerialize.Declare
+
+	'gvManUtility
+	Gui.frmManUtility.GsGCManUtility.Serialize("gvManUtility",V.Local.sSerialize)
+	F.Global.Registry.AddValue(V.Caller.User,V.Caller.CompanyCode,"gvManUtility",4631,1000,False,"Serialize",False,0,-999.0,1/1/1980,12:00:00 AM,V.Local.sSerialize)
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End
+
+	F.Intrinsic.Control.EndTry
+Program.Sub.Serialize.End
+
+Program.Sub.Deserialize.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+
+	V.Local.sSerialize.Declare
+
+	'gvManUtility
+	F.Global.Registry.ReadValue(V.Caller.User,V.Caller.CompanyCode,"gvManUtility",4631,1000,6,"",V.Local.sSerialize)
+	F.Intrinsic.Control.If(V.Local.sSerialize.Trim,<>,"")
+		Gui.frmManUtility.GsGCManUtility.Deserialize(V.Local.sSerialize)
+	F.Intrinsic.Control.EndIf
+
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End
+
+	F.Intrinsic.Control.EndTry
+Program.Sub.Deserialize.End
+
+Program.Sub.Comments.Start
+${$0$}$Man Utilization$}$DENI YUNUS$}$7/30/2019 8:30:15 AM$}$False
+${$3$}$0$}$$}$0$}$-1$}$$}$12:00:00 AM$}$DISPLAY ALL EMPLOYEES WITH ACTUAL TIME, TOTAL TIME ATTENDENCE, TOTAL INDIRECT, AND MAN UTILIZATION
+${$5$}$2.0.0.0$}$2
+${$6$}$dyunus$}$20231010170944267$}$xZ6SHi8g7O0Qsxe6AiO2NH3PnOKQRy0TyVGDco730vEjaOz5pY9C89EPXqyA5sO1FcFoSh+I3Jw=
+Program.Sub.Comments.End
